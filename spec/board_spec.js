@@ -6,9 +6,17 @@ describe('Board', function() {
   var board,
       cell;
 
-  beforeEach(function() {
-    cell = {value: null};
+  function makeCell(value) {
+    return {
+      value: value,
+      getValue: function() {
+        return this.value;
+      }
+    };
+  }
 
+  beforeEach(function() {
+    cell = makeCell(null);
     spyOn(Board.prototype, 'createCell').andReturn(cell);
     board = new Board();
   });
@@ -31,7 +39,7 @@ describe('Board', function() {
     });
   });
 
-  describe('generateCells', function() {
+  describe('#generateCells', function() {
     it('should set an array of cell rows relative to the board size', function() {
       expect(board.cells.length).toBe(3);
     });
@@ -41,44 +49,42 @@ describe('Board', function() {
     });
   });
 
-  describe('iterate', function() {
+  describe('#iterate', function() {
     var obj = {
       iterator: noop
     };
 
     beforeEach(function() {
       spyOn(obj, 'iterator');
+      board.iterate(obj.iterator);
     });
 
     it('should invoke a function against each cell', function() {
-      board.iterate(obj.iterator);
       expect(obj.iterator.callCount).toBe(9);
     });
 
     it('should pass the cell and position coordinates to the iterator', function() {
-      board.iterate(obj.iterator);
-
-      // will match any of the calls
+      // will match any call
       expect(obj.iterator).toHaveBeenCalledWith(cell, 0, 0);
     });
   });
 
-  describe('map', function() {
+  describe('#map', function() {
     var collection;
 
-    function transformer(cell) {
+    function callback(cell) {
       return cell.value;
     }
 
     beforeEach(function() {
-      collection = board.map(transformer);
+      collection = board.map(callback);
     });
 
     it('should return a new collection of the same size', function() {
       expect(collection.length).toBe(3);
     });
 
-    it('should map each cell based on the provided transformer function', function() {
+    it('should map each cell based on the provided callback function', function() {
       var result = collection[0][0];
       expect(result).toBe(null);
     });
@@ -89,30 +95,111 @@ describe('Board', function() {
     });
   });
 
-  describe('getValues', function() {
+  describe('#eachRow', function() {
+    var obj = {
+      callback: noop
+    };
+
+    beforeEach(function() {
+      spyOn(obj, 'callback');
+      board.eachRow(obj.callback);
+    });
+
+    it('should iterate through all the rows on the board', function() {
+      expect(obj.callback.callCount).toBe(3);
+    });
+
+    it('should pass the row and index to the callback', function() {
+      // will match any call
+      expect(obj.callback).toHaveBeenCalledWith(jasmine.any(Array), 0);
+    });
+  });
+
+  describe('#eachColumn', function() {
+    var obj = {
+      callback: noop
+    };
+
+    beforeEach(function() {
+      spyOn(obj, 'callback');
+      board.eachColumn(obj.callback);
+    });
+
+    it('should iterate through all the columns on the board', function() {
+      expect(obj.callback.callCount).toBe(3);
+    });
+
+    it('should pass the column and index to the callback', function() {
+      // will match any call
+      expect(obj.callback).toHaveBeenCalledWith(jasmine.any(Array), 0);
+    });
+  });
+
+  describe('#eachDiagonal', function() {
+    var obj = {
+      callback: noop
+    };
+
+    beforeEach(function() {
+      spyOn(obj, 'callback');
+      board.eachDiagonal(obj.callback);
+    });
+
+    it('should iterate through all the diagonals on the board', function() {
+      expect(obj.callback.callCount).toBe(2);
+    });
+
+    it('should pass the column and index to the callback', function() {
+      // will match any call
+      expect(obj.callback).toHaveBeenCalledWith(jasmine.any(Array), 0);
+    });
+  });
+
+  describe('#getValues', function() {
     it('should return an array of cell values', function() {
       var values = board.getValues();
       expect(values[0][0]).toBe(cell.value);
     });
   });
 
-  describe('hasWinner', function() {
-    var board,
-        values;
+  describe('#collectionClaimed', function() {
+    function makeCollection(val1, val2) {
+      return [makeCell(val1), makeCell(val2)];
+    }
+
+    it('should return false if a collection of cells do not all have the same value', function() {
+      var collection = makeCollection('x', 'y'),
+          isClaimed = board.collectionClaimed(collection);
+
+      expect(isClaimed).toBe(false);
+    });
+
+    it('should return false if a collection of cells have falsey values', function() {
+      var collection = makeCollection(null, null),
+          isClaimed = board.collectionClaimed(collection);
+
+      expect(isClaimed).toBe(false);
+    });
+
+    it('should return true if a collection of cells have the same values', function() {
+      var collection = makeCollection('x', 'x'),
+          isClaimed = board.collectionClaimed(collection);
+
+      expect(isClaimed).toBe(true);
+    });
+  });
+
+  describe('#hasWinner', function() {
+    var board;
+
+    function makeCollection(val1, val2) {
+      return [makeCell(val1), makeCell(val2)];
+    }
 
     beforeEach(function() {
 
       // use small board for more concise setup
       board = new Board(2);
-
-      values = [
-        [null, null],
-        [null, null]
-      ];
-
-      spyOn(board, 'getValues').andCallFake(function() {
-        return values;
-      });
     });
 
     it('should return false if no value is the winner', function() {
@@ -120,13 +207,21 @@ describe('Board', function() {
     });
 
     it('should return true if a value has claimed an entire row', function() {
-      values[0] = ['x', 'x'];
+      board.cells[0] = makeCollection('x', 'x');
       expect(board.hasWinner()).toBe(true);
     });
 
     it('should return true if a value has claimed an entire column', function() {
-      values[0][0] = 'x';
-      values[1][0] = 'x';
+      board.cells[0] = makeCollection('x', null);
+      board.cells[1] = makeCollection('x', null);
+
+      expect(board.hasWinner()).toBe(true);
+    });
+
+
+    it('should return true if a value has claimed an entire diagonal', function() {
+      board.cells[0] = makeCollection(null, 'x');
+      board.cells[1] = makeCollection('x', null);
 
       expect(board.hasWinner()).toBe(true);
     });
