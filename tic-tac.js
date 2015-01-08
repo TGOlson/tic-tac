@@ -1,1 +1,3 @@
-// puts codez here
+var Game = require('./lib/game');
+
+new Game();
