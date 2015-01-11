@@ -113,3 +113,37 @@ board[8] = 'x';
 print();
 
 console.log(hasWinner());
+
+// function Iterator(data) {
+//   this.data = data;
+
+//   this.index = -1;
+// }
+
+// Iterator.prototype.current = function() {
+//   return this.data[this.index];
+// };
+
+// Iterator.prototype.next = function() {
+//   this.index++;
+
+//   return {
+//     value: this.current(),
+//     done: this.hasNext()
+//   };
+// };
+
+// Iterator.prototype.hasNext = function() {
+//   return this.data.length -1 <= this.index;
+// };
+
+// var boardIterator = new Iterator(board);
+
+// log(boardIterator.next());
+// log(boardIterator.next());
+// log(boardIterator.next());
+
+
+// http://stackoverflow.com/questions/4198955/how-to-find-the-winner-of-a-tic-tac-toe-game-of-any-size
+// http://stackoverflow.com/questions/1056316/algorithm-for-determining-tic-tac-toe-game-over
+// http://stackoverflow.com/questions/125557/what-algorithm-for-a-tic-tac-toe-game-can-i-use-to-determine-the-best-move-for?rq=1
