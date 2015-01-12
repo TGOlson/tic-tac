@@ -16,8 +16,7 @@ describe('Cell', function() {
   describe('#getValue', function() {
     it('should get the value property on the cell', function() {
       var value = 'x';
-      cell.value = value;
-      expect(cell.getValue()).toBe(value);
+      expect(cell.getValue()).toBe(cell.value);
     });
   });
 
