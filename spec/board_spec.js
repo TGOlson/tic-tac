@@ -13,7 +13,7 @@ describe('Board', function() {
   }
 
   beforeEach(function() {
-    spyOn(Board.prototype, 'createCell').andCallFake(makeCell.bind(null, null));
+    spyOn(Board.prototype, '_createCell').andCallFake(makeCell.bind(null, null));
     board = new Board();
   });
 
@@ -23,10 +23,10 @@ describe('Board', function() {
     });
 
     it('should generate a new set of cells', function() {
-      spyOn(Board.prototype, 'makeCells');
+      spyOn(Board.prototype, '_makeCells');
 
       var board = new Board();
-      expect(board.makeCells).toHaveBeenCalled();
+      expect(board._makeCells).toHaveBeenCalled();
     });
 
     it('should set an arbitrary board size if one is defined', function() {
@@ -35,15 +35,15 @@ describe('Board', function() {
     });
   });
 
-  describe('#makeCells', function() {
+  describe('#_makeCells', function() {
     it('should return an array with length relative to the board size', function() {
       expect(board.cells.length).toBe(board.size);
     });
   });
 
-  describe('#makeRow', function() {
+  describe('#_makeRow', function() {
     it('should return an array with length relative to the board size', function() {
-      var row = board.makeRow();
+      var row = board._makeRow();
       expect(row.length).toBe(board.size);
     });
   });
@@ -51,12 +51,71 @@ describe('Board', function() {
   describe('#getRow', function() {
     it('should return a row based on the provided row number', function() {
       var row = board.getRow(1);
-      expect(row).toBe(board.cells[1]);
+      expect(row).toEqual(board.cells[1]);
     });
 
-    it('should return undefined if no row exists in the specified location', function() {
+    it('should return a copy of the row', function() {
+      var row = board.getRow(1);
+      expect(row).not.toBe(board.cells[1]);
+    });
+
+    it('should return null if no row exists in the specified location', function() {
       var row = board.getRow(7);
       expect(row).toBeUndefined();
+    });
+  });
+
+  describe('#getColumn', function() {
+    it('should return a column based on the provided column number', function() {
+      var column = board.getColumn(1),
+          expectedColumn = [
+            board.cells[0][1],
+            board.cells[1][1],
+            board.cells[2][1]
+          ];
+
+      expect(column).toEqual(expectedColumn);
+    });
+
+    it('should return undefined if no column exists in the specified location', function() {
+      var column = board.getColumn(7),
+
+          // TODO: this test should check that the return value is 'undefined'
+          // not that it is an array of undefined
+          expectedColumn = [
+            undefined,
+            undefined,
+            undefined
+          ];
+
+      expect(column).toEqual(expectedColumn);
+    });
+  });
+
+  describe('#getDiagonal', function() {
+    it('should return a diagonal based on the provided direction', function() {
+      var diagonal = board.getDiagonal(1),
+          expectedDiagonal = [
+            board.cells[0][0],
+            board.cells[1][1],
+            board.cells[2][2]
+          ];
+
+      expect(diagonal).toEqual(expectedDiagonal);
+    });
+
+    it('should return undefined if no diagonal exists in the specified direction', function() {
+      var diagonal = board.getDiagonal(7),
+
+          // TODO: this test should check that the return value is 'undefined'
+          // not that it is an array of undefined
+          expectedDiagonal = [
+            undefined,
+            undefined,
+            undefined
+          ];
+
+      expect(diagonal).toEqual(expectedDiagonal);
     });
   });
 
