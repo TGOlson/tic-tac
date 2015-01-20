@@ -19,3 +19,9 @@ Run code
 ```
 $ node tic-tac.js
 ```
+
+TODO:
+
+* Convert board to a flat array of cells
+* Array location does not denote cell location
+* Cells know their location
