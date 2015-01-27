@@ -1,3 +1,3 @@
-var Game = require('./lib/game');
+var Game = require('./lib/models/game');
 
 new Game();
