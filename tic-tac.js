@@ -7,6 +7,10 @@ game
   .start();
 
 function renderWithConsole() {
-  var values = this.board.map('value').join('\n');
+  var values = this.board.map(getValue).join('\n');
   console.log(values + '\n');
+}
+
+function getValue(cell) {
+  return cell.getValue() || '-';
 }
